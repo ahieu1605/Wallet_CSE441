@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../constants/Colors";
+import { COLORS } from "@/constants/Colors";
 
 export const styles = StyleSheet.create({
     container: {
@@ -69,6 +69,16 @@ export const styles = StyleSheet.create({
         marginLeft: 4,
     },
     logoutButton: {
+        padding: 10,
+        borderRadius: 20,
+        backgroundColor: COLORS.card,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    themeButton: {
         padding: 10,
         borderRadius: 20,
         backgroundColor: COLORS.card,

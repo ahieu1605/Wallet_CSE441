@@ -1,6 +1,6 @@
 const coffeeTheme = {
   primary: "#8B593E",
-  background: "#FFF8F3",
+  background: "#EAE4D5",
   text: "#4A3428",
   border: "#E5D3B7",
   white: "#FFFFFF",
@@ -11,7 +11,7 @@ const coffeeTheme = {
   shadow: "#000000",
 };
 
-const forestTheme = {
+const greenTheme = {
   primary: "#2E7D32",
   background: "#E8F5E9",
   text: "#1B5E20",
@@ -37,7 +37,7 @@ const purpleTheme = {
   shadow: "#000000",
 };
 
-const oceanTheme = {
+const blueTheme = {
   primary: "#0277BD",
   background: "#E1F5FE",
   text: "#01579B",
@@ -50,11 +50,82 @@ const oceanTheme = {
   shadow: "#000000",
 };
 
+const redTheme = {
+  primary: "#C0392B",
+  background: "#FDEDEC",
+  text: "#922B21",
+  border: "#F5B7B1",
+  white: "#FFFFFF",
+  textLight: "#F1948A",
+  expense: "#E74C3C",
+  income: "#27AE60",
+  card: "#FFFFFF",
+  shadow: "#000000",
+};
+
+const yellowTheme = {
+  primary: "#F1C40F",
+  background: "#FEF9E7",
+  text: "#B7950B",
+  border: "#F9E79F",
+  white: "#FFFFFF",
+  textLight: "#F7DC6F",
+  expense: "#D68910",
+  income: "#229954",
+  card: "#FFFFFF",
+  shadow: "#000000",
+};
+
+
+const silverTheme = {
+  primary: "#555555",
+  background: "#ECECEC",
+  text: "#707070",
+  border: "#DCDCDC",
+  white: "#FFFFFF",
+  textLight: "#A9A9A9",
+  expense: "#D32F2F",
+  income: "#388E3C",
+  card: "#FFFFFF",
+  shadow: "#000000",
+};
+
+const orangeTheme = {
+  primary: "#FB8C00",
+  background: "#FFF3E0",
+  text: "#E65100",
+  border: "#FFE0B2",
+  white: "#FFFFFF",
+  textLight: "#FFB74D",
+  expense: "#E53935",
+  income: "#43A047",
+  card: "#FFFFFF",
+  shadow: "#000000",
+};
+
+const pinkTheme = {
+  primary: "#EC407A",
+  background: "#FCE4EC",
+  text: "#AD1457",
+  border: "#F8BBD0",
+  white: "#FFFFFF",
+  textLight: "#F06292",
+  expense: "#D32F2F",
+  income: "#388E3C",
+  card: "#FFFFFF",
+  shadow: "#000000",
+};
+
 export const THEMES = {
   coffee: coffeeTheme,
-  forest: forestTheme,
+  forest: greenTheme,
   purple: purpleTheme,
-  ocean: oceanTheme,
+  ocean: blueTheme,
+  red: redTheme,
+  yellow: yellowTheme,
+  silver: silverTheme,
+  orange: orangeTheme,
+  pink: pinkTheme,
 };
 
 export const COLORS = THEMES.ocean;
