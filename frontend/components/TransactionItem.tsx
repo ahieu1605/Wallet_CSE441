@@ -15,8 +15,14 @@ const CATEGORY_ICONS = {
     Other: 'ellipsis-horizontal',
 };
 
+const getFormattedAmount = (amount: any, isIncome: boolean) => {
+    const num = Number(amount);
+    if (isNaN(num)) return '0.00';
+    return `${isIncome ? '+' : '-'}$${Math.abs(num).toFixed(2)}`;
+};
+
 export const TransactionItem = ({ item, onDelete }) => {
-    const isIncome = parseFloat(item.amount) > 0;
+    const isIncome = Number(item.amount) > 0;
     const iconName = CATEGORY_ICONS[item.category] || 'pricetag-outline';
     const { theme } = useAppTheme();
 
@@ -31,10 +37,8 @@ export const TransactionItem = ({ item, onDelete }) => {
                     <Text style={[styles.transactionCategory, { color: theme.textLight }]}>{item.category}</Text>
                 </View>
                 <View style={styles.transactionRight}>
-                    <Text
-                        style={[styles.transactionAmount, { color: isIncome ? theme.income : theme.expense }]}
-                    >
-                        {isIncome ? '+' : '-'}${Math.abs(parseFloat(item.amount)).toFixed(2)}
+                    <Text style={[styles.transactionAmount, { color: isIncome ? theme.income : theme.expense }]}>
+                        {getFormattedAmount(item.amount, isIncome)}
                     </Text>
                     <Text style={[styles.transactionDate, { color: theme.textLight }]}>
                         {formatDate(item.created_at)}
