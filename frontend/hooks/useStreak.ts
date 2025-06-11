@@ -21,7 +21,7 @@ export const useStreak = () => {
         };
 
         // updateStreak();
-        setStreak(600)
+        setStreak(0)
     }, []);
 
     const getFlameColor = () => {

@@ -23,7 +23,7 @@ export const TransactionItem = ({ item, onDelete }) => {
     return (
         <View style={[styles.transactionCard, { backgroundColor: theme.card }]} key={item.id}>
             <TouchableOpacity style={styles.transactionContent}>
-                <View style={[styles.categoryIconContainer, { backgroundColor: theme.primaryLight }]}>
+                <View style={[styles.categoryIconContainer, { backgroundColor: theme.primary }]}>
                     <Ionicons name={iconName} size={22} color={isIncome ? theme.income : theme.expense} />
                 </View>
                 <View style={styles.transactionLeft}>
