@@ -21,10 +21,10 @@ const NoTransactionsFound = () => {
             <Text style={[styles.emptyStateText, { color: theme.textLight }]}>
                 Start tracking your finances by adding your first transaction.
             </Text>
-            <TouchableOpacity style={[styles.emptyStateButton, { backgroundColor: theme.primary }]} onPress={() => router.push("/create")}>
+            {/* <TouchableOpacity style={[styles.emptyStateButton, { backgroundColor: theme.primary }]} onPress={() => router.push("/create")}>
                 <Ionicons name="add-circle" size={18} color={theme.white} />
                 <Text style={[styles.emptyStateButtonText, { color: theme.white }]}>Add Transaction</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 };

@@ -7,6 +7,7 @@ import { styles } from '@/assets/styles/create.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/Colors';
 import { useAppTheme } from '@/components/ThemeProvider';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 const CATEGORIES = [
@@ -71,7 +72,7 @@ const CreateScreen = () => {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <KeyboardAwareScrollView style={[styles.container, { backgroundColor: theme.background }]}>
             {/* HEADER */}
             <View style={[styles.header, { borderColor: theme.border }]}>
                 <TouchableOpacity style={[styles.backButton, { borderColor: theme.border }]} onPress={() => router.back()}>
@@ -129,16 +130,15 @@ const CreateScreen = () => {
 
                 {/* AMOUNT CONTAINER */}
                 <View style={[styles.amountContainer, { borderColor: theme.border }]}>
-                    <Text style={[styles.currencySymbol, { color: theme.text }]}>$</Text>
                     <TextInput
                         style={[styles.amountInput, { color: theme.text }]}
-                        placeholder='0.00'
+                        placeholder='0'
                         placeholderTextColor={theme.text}
                         value={amount}
                         onChangeText={setAmount}
                         keyboardType='numeric'
-
                     />
+                    <Text style={[styles.currencySymbol, { color: theme.text }]}>VND</Text>
                 </View>
 
 
@@ -207,7 +207,7 @@ const CreateScreen = () => {
                     <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             )}
-        </View>
+        </KeyboardAwareScrollView>
     )
 }
 

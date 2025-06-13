@@ -95,7 +95,7 @@ export default function HomePage() {
                     {/* Right Section */}
                     <View style={styles.headerRight}>
                         <ThemeSwitcher />
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={[
                                 styles.addButton,
                                 { backgroundColor: theme.primary },
@@ -106,7 +106,7 @@ export default function HomePage() {
                             <Text style={[styles.addButtonText, { color: theme.white }]}>
                                 Add
                             </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         <SignOutButton />
                     </View>
                 </View>

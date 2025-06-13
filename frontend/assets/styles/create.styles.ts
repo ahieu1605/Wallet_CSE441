@@ -1,5 +1,10 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import { COLORS } from "../../constants/Colors";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { useState } from "react";
+
+const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+const [dateType, setDateType] = useState<'start' | 'end' | null>(null);
 
 export const styles = StyleSheet.create({
     container: {

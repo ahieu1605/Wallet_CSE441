@@ -18,7 +18,7 @@ const CATEGORY_ICONS = {
 const getFormattedAmount = (amount: any, isIncome: boolean) => {
     const num = Number(amount);
     if (isNaN(num)) return '0.00';
-    return `${isIncome ? '+' : '-'}$${Math.abs(num).toFixed(2)}`;
+    return `${isIncome ? '+' : '-'}$${Math.abs(num)}`;
 };
 
 export const TransactionItem = ({ item, onDelete }) => {
