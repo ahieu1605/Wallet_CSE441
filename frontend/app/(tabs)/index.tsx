@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
     Text,
@@ -40,9 +42,11 @@ export default function HomePage() {
 
     const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [loadData])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);

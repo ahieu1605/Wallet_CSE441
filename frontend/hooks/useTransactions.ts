@@ -60,7 +60,6 @@ export const useTransactions = (userId) => {
             Alert.alert("Success", "Transaction deleted successfully");
         } catch (error) {
             console.error("Error deleting transaction:", error);
-            Alert.alert("Error", error.message);
         }
     };
 
