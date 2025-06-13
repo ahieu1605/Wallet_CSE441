@@ -3,7 +3,11 @@ import { StyleSheet, Text, View, TextInput, Button, ScrollView, TouchableOpacity
 import DateTimePicker from '@react-native-community/datetimepicker';
 import GoalCalendar from '../../components/GoalCalendar';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { styles as createStyles } from '../../assets/styles/create.styles';
+import { styles } from '../../assets/styles/create.styles';
+import { useAppTheme } from '@/components/ThemeProvider';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -49,6 +53,9 @@ const Schedule = () => {
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState<'start' | 'end' | null>(null);
+    const { theme } = useAppTheme();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
 
     // Tính toán
     let days: Date[] = [];
@@ -66,36 +73,56 @@ const Schedule = () => {
     }
 
     return (
-        <ScrollView style={[createStyles.container]}>
-            <Text style={createStyles.sectionTitle}>Set your goal:</Text>
-            <View style={createStyles.inputContainer}>
-                <TextInput
-                    style={createStyles.input}
-                    keyboardType="numeric"
-                    value={goal}
-                    onChangeText={setGoal}
-                    placeholder="Enter your saving goal (VND)"
-                />
+        <KeyboardAwareScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+            {/* HEADER */}
+            <View style={[styles.header, { borderColor: theme.border }]}>
+                <TouchableOpacity style={[styles.backButton, { borderColor: theme.border }]} onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color={theme.text} />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>Saving Schedule</Text>
+                {/* <TouchableOpacity
+                    style={[styles.saveButtonContainer, { borderColor: theme.border }, isLoading && styles.saveButtonDisabled]}
+                    onPress={handleSaveSchedule}
+                    disabled={isLoading}
+                >
+                    <Text style={[styles.saveButton, { color: theme.text }]}>{isLoading ? "Saving..." : "Save"}</Text>
+                    {!isLoading && <Ionicons name="checkmark" size={18} color={theme.primary} />}
+                </TouchableOpacity> */}
             </View>
-            <Text style={createStyles.sectionTitle}>Set date:</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                <TouchableOpacity
-                    style={[createStyles.inputContainer, { flex: 1, marginRight: 8 }]}
-                    onPress={() => { setDateType('start'); setDatePickerVisibility(true); }}
-                >
-                    <Text style={createStyles.input}>
-                        {startDate ? startDate.toLocaleDateString() : 'Start date'}
-                    </Text>
-                </TouchableOpacity>
-                <Text style={{ marginHorizontal: 4 }}>to</Text>
-                <TouchableOpacity
-                    style={[createStyles.inputContainer, { flex: 1, marginLeft: 8 }]}
-                    onPress={() => { setDateType('end'); setDatePickerVisibility(true); }}
-                >
-                    <Text style={createStyles.input}>
-                        {endDate ? endDate.toLocaleDateString() : 'End date'}
-                    </Text>
-                </TouchableOpacity>
+
+            {/* SET GOAL */}
+            <View style={styles.card}>
+
+                <View style={[styles.inputContainer, { borderColor: theme.border }]}>
+                    <TextInput
+                        style={[styles.input, { color: theme.text }]}
+                        keyboardType="numeric"
+                        value={goal}
+                        onChangeText={setGoal}
+                        placeholder="Enter your saving goal"
+                        placeholderTextColor={theme.text}
+                    />
+                    <Text style={[styles.currencySymbol, { color: theme.text }]}>VND</Text>
+                </View>
+                <View style={styles.typeSelector}>
+                    <TouchableOpacity
+                        style={[styles.inputContainer, { flex: 1, marginRight: 8 }, { borderColor: theme.border }]}
+                        onPress={() => { setDateType('start'); setDatePickerVisibility(true); }}
+                    >
+                        <Text style={[styles.input, { color: theme.text }]}>
+                            {startDate ? startDate.toLocaleDateString() : 'Start Date'}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.inputContainer, { flex: 1, marginLeft: 8 }, { borderColor: theme.border }]}
+                        onPress={() => { setDateType('end'); setDatePickerVisibility(true); }}
+                    >
+                        <Text style={[styles.input, { color: theme.text }]}>
+                            {endDate ? endDate.toLocaleDateString() : 'End Date'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
             </View>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -110,10 +137,6 @@ const Schedule = () => {
             />
             {goal && startDate && endDate && endDate >= startDate && (
                 <View style={{ marginTop: 20 }}>
-                    <Text style={createStyles.sectionTitle}>
-                        Goal: {parseInt(goal).toLocaleString()} VND {'\n'}
-                        From: {startDate.toLocaleDateString()} To: {endDate.toLocaleDateString()} {'\n'}
-                    </Text>
                     <GoalCalendar
                         goal={parseInt(goal)}
                         startDate={startDate}
@@ -121,77 +144,8 @@ const Schedule = () => {
                     />
                 </View>
             )}
-        </ScrollView>
+        </KeyboardAwareScrollView>
     );
 };
 
 export default Schedule;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginBottom: 6,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
-        padding: 8,
-        marginBottom: 12,
-        fontSize: 16,
-    },
-    dateBtn: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
-        padding: 8,
-        minWidth: 100,
-        alignItems: 'center',
-        backgroundColor: '#f9f6e7',
-    },
-    summary: {
-        fontSize: 15,
-        marginBottom: 8,
-        color: '#6d4c00',
-    },
-    row: {
-        flexDirection: 'row',
-    },
-    headerCell: {
-        flex: 1,
-        backgroundColor: '#f9e7a1',
-        padding: 6,
-        borderWidth: 0.5,
-        borderColor: '#f3e2a9',
-        alignItems: 'center',
-    },
-    headerText: {
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    cell: {
-        flex: 1,
-        minHeight: 60,
-        borderWidth: 0.5,
-        borderColor: '#f3e2a9',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fffbe7',
-        padding: 2,
-    },
-    dateText: {
-        fontSize: 14,
-        color: '#6d4c00',
-    },
-    amountText: {
-        fontSize: 13,
-        color: '#b8860b',
-        fontWeight: 'bold',
-    },
-});

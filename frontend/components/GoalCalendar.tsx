@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { styles } from '../assets/styles/home.styles';
+import { useAppTheme } from './ThemeProvider';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -43,11 +46,49 @@ interface GoalCalendarProps {
 const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate }) => {
     const days = getDaysArray(startDate, endDate);
     const calendar = getCalendarMatrix(days);
-    const totalDays = days.length;
-    const dailyAmount = Math.ceil(goal / totalDays / 1000) * 1000;
+    const { theme } = useAppTheme();
+    const cellHeight = 100;
+
+    const N = days.length;
+    const T = goal;
+    let a = Math.ceil((T / N * 0.1) / 1000) * 1000;
+    let d = Math.ceil((T - N * a) / ((N - 1) * N / 2) / 1000) * 1000;
+    let dailyAmounts: number[] = [];
+    let total = 0;
+    let found = false;
+    while (!found && d > 0) {
+        dailyAmounts = [];
+        for (let n = 1; n < N; n++) {
+            let val = Math.ceil((a + (n - 1) * d) / 1000) * 1000;
+            dailyAmounts.push(val);
+        }
+        let sumFirstNMinus1 = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
+        let lastDay = T - sumFirstNMinus1;
+        if (dailyAmounts.length > 0 && lastDay <= dailyAmounts[dailyAmounts.length - 1]) {
+            lastDay = dailyAmounts[dailyAmounts.length - 1] + 1000;
+        }
+        lastDay = Math.ceil(lastDay / 1000) * 1000;
+        dailyAmounts.push(lastDay);
+        total = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
+        if (total <= T + 10000) {
+            found = true;
+        } else {
+            d -= 1000;
+        }
+    }
+    if (total > T + 10000) {
+        let sumFirstNMinus1 = dailyAmounts.slice(0, N - 1).reduce((acc, cur) => acc + cur, 0);
+        let lastDay = T - sumFirstNMinus1;
+        if (lastDay <= dailyAmounts[N - 2]) {
+            lastDay = dailyAmounts[N - 2] + 1000;
+        }
+        lastDay = Math.ceil(lastDay / 1000) * 1000;
+        dailyAmounts[N - 1] = lastDay;
+        total = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
+    }
     let accum = 0;
-    const accumAmounts = days.map(() => (accum += dailyAmount));
-    const [saved, setSaved] = useState<boolean[]>(Array(totalDays).fill(false));
+    const accumAmounts = dailyAmounts.map((amt) => (accum += amt));
+    const [saved, setSaved] = useState<boolean[]>(Array(N).fill(false));
 
     const toggleSaved = (idx: number) => {
         setSaved((prev) => {
@@ -56,38 +97,40 @@ const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate })
             return copy;
         });
     };
-
     return (
-        <View style={styles.calendarWrap}>
+        <KeyboardAwareScrollView
+            style={[styles.calendarWrap, { backgroundColor: theme.background, flex: 1 }]}
+            contentContainerStyle={{ minHeight: calendar.length * cellHeight + 10 }}
+        >
             <ScrollView horizontal>
                 <View>
                     {/* Header */}
-                    <View style={styles.row}>
+                    <View style={[styles.row, { backgroundColor: theme.background }]}>
                         {WEEK_DAYS.map((d) => (
-                            <View style={styles.headerCell} key={d}>
-                                <Text style={styles.headerText}>{d}</Text>
+                            <View style={[styles.headerCell, { backgroundColor: theme.primary }, { borderColor: theme.border }]} key={d}>
+                                <Text style={[styles.headerText, { color: theme.white }]}>{d}</Text>
                             </View>
                         ))}
                     </View>
                     {/* Calendar Rows */}
                     {calendar.map((week, i) => (
-                        <View style={styles.row} key={i}>
+                        <View style={[styles.row, { backgroundColor: theme.primary }, { borderColor: theme.border }]} key={i}>
                             {week.map((date, j) => {
-                                if (!date) return <View style={styles.cell} key={j} />;
+                                if (!date) return <View style={[styles.cell, { backgroundColor: theme.background }, { borderColor: theme.border }]} key={j} />;
                                 const idx = days.findIndex(
                                     (d) => d.toDateString() === date.toDateString()
                                 );
                                 const isSaved = saved[idx];
                                 return (
                                     <TouchableOpacity
-                                        style={[styles.cell, isSaved && styles.savedCell]}
+                                        style={[styles.cell, isSaved && styles.savedCell, { backgroundColor: theme.border }, { borderColor: theme.border }]}
                                         key={j}
                                         onPress={() => toggleSaved(idx)}
                                         activeOpacity={0.7}
                                     >
-                                        <Text style={styles.dateText}>{date.getDate()}</Text>
-                                        <Text style={styles.amountText}>{accumAmounts[idx].toLocaleString()}</Text>
-                                        {isSaved && <Text style={styles.checkMark}>✓</Text>}
+                                        <Text style={[styles.dateText, { color: theme.text }]}>{date.getDate()}</Text>
+                                        <Text style={[styles.amountText, { color: theme.primary }]}>{dailyAmounts[idx] !== undefined ? dailyAmounts[idx].toLocaleString() : ''}</Text>
+                                        {isSaved && <Text style={[styles.checkMark, { color: theme.text }]}>✓</Text>}
                                     </TouchableOpacity>
                                 );
                             })}
@@ -95,62 +138,8 @@ const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate })
                     ))}
                 </View>
             </ScrollView>
-        </View>
+        </KeyboardAwareScrollView>
     );
 };
 
 export default GoalCalendar;
-
-const styles = StyleSheet.create({
-    calendarWrap: {
-        marginTop: 10,
-        marginBottom: 20,
-    },
-    row: {
-        flexDirection: 'row',
-    },
-    headerCell: {
-        flex: 1,
-        backgroundColor: '#f9e7a1',
-        padding: 6,
-        borderWidth: 0.5,
-        borderColor: '#f3e2a9',
-        alignItems: 'center',
-    },
-    headerText: {
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    cell: {
-        flex: 1,
-        minHeight: 60,
-        borderWidth: 0.5,
-        borderColor: '#f3e2a9',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fffbe7',
-        padding: 2,
-        position: 'relative',
-    },
-    savedCell: {
-        backgroundColor: '#c6f7e2',
-        borderColor: '#2ecc71',
-    },
-    dateText: {
-        fontSize: 14,
-        color: '#6d4c00',
-    },
-    amountText: {
-        fontSize: 13,
-        color: '#b8860b',
-        fontWeight: 'bold',
-    },
-    checkMark: {
-        position: 'absolute',
-        right: 4,
-        top: 2,
-        color: '#2ecc71',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-});
