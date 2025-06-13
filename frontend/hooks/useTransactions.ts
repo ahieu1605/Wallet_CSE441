@@ -55,7 +55,7 @@ export const useTransactions = (userId) => {
     const deleteTransaction = async (id) => {
         try {
             const response = await fetch(`${API_URL}/transactions/${id}`, { method: "DELETE" });
-            if (response.ok) throw new Error("Failed to delete transaction");
+            if (!response.ok) throw new Error("Failed to delete transaction");
             loadData();
             Alert.alert("Success", "Transaction deleted successfully");
         } catch (error) {
