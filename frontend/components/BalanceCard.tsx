@@ -12,6 +12,10 @@ export const BalanceCard = ({ summary }) => {
                 {parseFloat(summary.balance) + " VND"}
             </Text>
 
+
+
+
+
             <View style={styles.balanceStats}>
                 <View style={styles.balanceStatItem}>
                     <Text style={[styles.balanceStatLabel, { color: theme.textLight }]}>Income</Text>
