@@ -41,9 +41,11 @@ interface GoalCalendarProps {
     goal: number;
     startDate: Date;
     endDate: Date;
+    savedStates?: boolean[];
+    onSaveStates?: (states: boolean[]) => void;
 }
 
-const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate }) => {
+const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate, savedStates, onSaveStates }) => {
     const days = getDaysArray(startDate, endDate);
     const calendar = getCalendarMatrix(days);
     const { theme } = useAppTheme();
@@ -53,50 +55,70 @@ const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate })
     const T = goal;
     let a = Math.ceil((T / N * 0.1) / 1000) * 1000;
     let d = Math.ceil((T - N * a) / ((N - 1) * N / 2) / 1000) * 1000;
-    let dailyAmounts: number[] = [];
-    let total = 0;
-    let found = false;
-    while (!found && d > 0) {
-        dailyAmounts = [];
-        for (let n = 1; n < N; n++) {
-            let val = Math.ceil((a + (n - 1) * d) / 1000) * 1000;
-            dailyAmounts.push(val);
-        }
-        let sumFirstNMinus1 = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
-        let lastDay = T - sumFirstNMinus1;
-        if (dailyAmounts.length > 0 && lastDay <= dailyAmounts[dailyAmounts.length - 1]) {
-            lastDay = dailyAmounts[dailyAmounts.length - 1] + 1000;
-        }
-        lastDay = Math.ceil(lastDay / 1000) * 1000;
-        dailyAmounts.push(lastDay);
-        total = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
-        if (total <= T + 10000) {
-            found = true;
-        } else {
-            d -= 1000;
+    let idealAmounts: number[] = [];
+    for (let n = 0; n < N; n++) {
+        idealAmounts.push(a + n * d);
+    }
+    let roundedAmounts = idealAmounts.map(x => Math.ceil(x / 1000) * 1000);
+    let sum = roundedAmounts.reduce((acc, cur) => acc + cur, 0);
+    let diff = sum - T;
+    if (diff > 0) {
+        let maxLoop = N * 2;
+        let loopCount = 0;
+        while (diff > 0 && loopCount < maxLoop) {
+            let changed = false;
+            for (let j = N - 1; j >= 0 && diff > 0; j--) {
+                if (roundedAmounts[j] - 1000 >= Math.ceil(idealAmounts[j] / 1000) * 1000) {
+                    roundedAmounts[j] -= 1000;
+                    diff -= 1000;
+                    changed = true;
+                }
+            }
+            if (!changed) break;
+            loopCount++;
         }
     }
-    if (total > T + 10000) {
-        let sumFirstNMinus1 = dailyAmounts.slice(0, N - 1).reduce((acc, cur) => acc + cur, 0);
-        let lastDay = T - sumFirstNMinus1;
-        if (lastDay <= dailyAmounts[N - 2]) {
-            lastDay = dailyAmounts[N - 2] + 1000;
+    let dailyAmounts = roundedAmounts;
+    const [saved, setSaved] = useState<boolean[]>(savedStates && savedStates.length === N ? savedStates : Array(N).fill(false));
+
+    React.useEffect(() => {
+        if (savedStates && savedStates.length === N) {
+            setSaved(savedStates);
         }
-        lastDay = Math.ceil(lastDay / 1000) * 1000;
-        dailyAmounts[N - 1] = lastDay;
-        total = dailyAmounts.reduce((acc, cur) => acc + cur, 0);
-    }
-    let accum = 0;
-    const accumAmounts = dailyAmounts.map((amt) => (accum += amt));
-    const [saved, setSaved] = useState<boolean[]>(Array(N).fill(false));
+    }, [savedStates, N]);
 
     const toggleSaved = (idx: number) => {
         setSaved((prev) => {
             const copy = [...prev];
             copy[idx] = !copy[idx];
+            if (onSaveStates) onSaveStates(copy);
             return copy;
         });
     };
+
+    const minAmount = Math.ceil(T / N / 1000) * 1000;
+    const threshold = 5000;
+    let runningTotal = 0;
+    let finalAmounts: (number | null)[] = [];
+    if (minAmount < threshold) {
+        // Cho phép để trống các ô cuối
+        for (let i = 0; i < dailyAmounts.length; i++) {
+            if (runningTotal >= T) {
+                finalAmounts.push(null);
+            } else {
+                let amount = dailyAmounts[i];
+                if (runningTotal + amount > T) {
+                    amount = T - runningTotal;
+                }
+                runningTotal += amount;
+                finalAmounts.push(amount > 0 ? amount : null);
+            }
+        }
+    } else {
+        // Luôn phân bổ đều, không để trống ô
+        finalAmounts = dailyAmounts;
+    }
+
     return (
         <KeyboardAwareScrollView
             style={[styles.calendarWrap, { backgroundColor: theme.background, flex: 1 }]}
@@ -107,7 +129,7 @@ const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate })
                     {/* Header */}
                     <View style={[styles.row, { backgroundColor: theme.background }]}>
                         {WEEK_DAYS.map((d) => (
-                            <View style={[styles.headerCell, { backgroundColor: theme.primary }, { borderColor: theme.border }]} key={d}>
+                            <View style={[styles.headerCell, { backgroundColor: theme.primary }, { borderColor: theme.text }]} key={d}>
                                 <Text style={[styles.headerText, { color: theme.white }]}>{d}</Text>
                             </View>
                         ))}
@@ -116,20 +138,22 @@ const GoalCalendar: React.FC<GoalCalendarProps> = ({ goal, startDate, endDate })
                     {calendar.map((week, i) => (
                         <View style={[styles.row, { backgroundColor: theme.primary }, { borderColor: theme.border }]} key={i}>
                             {week.map((date, j) => {
-                                if (!date) return <View style={[styles.cell, { backgroundColor: theme.background }, { borderColor: theme.border }]} key={j} />;
+                                if (!date) return <View style={[styles.cell, { backgroundColor: theme.background }, { borderColor: theme.text }]} key={j} />;
                                 const idx = days.findIndex(
                                     (d) => d.toDateString() === date.toDateString()
                                 );
                                 const isSaved = saved[idx];
                                 return (
                                     <TouchableOpacity
-                                        style={[styles.cell, isSaved && styles.savedCell, { backgroundColor: theme.border }, { borderColor: theme.border }]}
+                                        style={[styles.cell, isSaved && styles.savedCell, { backgroundColor: theme.border }, { borderColor: theme.text }]}
                                         key={j}
                                         onPress={() => toggleSaved(idx)}
                                         activeOpacity={0.7}
                                     >
                                         <Text style={[styles.dateText, { color: theme.text }]}>{date.getDate()}</Text>
-                                        <Text style={[styles.amountText, { color: theme.primary }]}>{dailyAmounts[idx] !== undefined ? dailyAmounts[idx].toLocaleString() : ''}</Text>
+                                        <Text style={[styles.amountText, { color: theme.primary }]}>
+                                            {finalAmounts[idx] !== undefined && finalAmounts[idx] !== null ? finalAmounts[idx].toLocaleString() : ''}
+                                        </Text>
                                         {isSaved && <Text style={[styles.checkMark, { color: theme.text }]}>✓</Text>}
                                     </TouchableOpacity>
                                 );

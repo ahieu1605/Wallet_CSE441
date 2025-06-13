@@ -7,7 +7,8 @@ import { styles } from '../../assets/styles/create.styles';
 import { useAppTheme } from '@/components/ThemeProvider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -47,6 +48,13 @@ function getCalendarMatrix(days: Date[]) {
     return matrix;
 }
 
+interface ScheduleHistory {
+    goal: number;
+    startDate: string;
+    endDate: string;
+    savedAt: string;
+}
+
 const Schedule = () => {
     const [goal, setGoal] = useState('');
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -56,6 +64,45 @@ const Schedule = () => {
     const { theme } = useAppTheme();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [history, setHistory] = useState<ScheduleHistory[]>([]);
+    const params = useLocalSearchParams();
+    const savedStatesRef = React.useRef<boolean[] | null>(null);
+
+    React.useEffect(() => {
+        if (params.goal && params.startDate && params.endDate) {
+            setGoal(params.goal as string);
+            setStartDate(new Date(params.startDate as string));
+            setEndDate(new Date(params.endDate as string));
+        }
+    }, [params.goal, params.startDate, params.endDate]);
+
+    const handleSaveSchedule = async () => {
+        if (!goal || !startDate || !endDate) return;
+        setIsLoading(true);
+        try {
+            let savedStates = savedStatesRef.current;
+            const newSchedule = {
+                goal: parseInt(goal),
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                savedAt: new Date().toISOString(),
+                savedStates,
+            };
+            // Lấy lịch sử cũ
+            const history = await AsyncStorage.getItem('schedule_history');
+            let arr = [];
+            if (history) arr = JSON.parse(history);
+            // Không lưu trùng
+            const isDuplicate = arr.some((item: any) => item.goal === newSchedule.goal && item.startDate === newSchedule.startDate && item.endDate === newSchedule.endDate);
+            if (!isDuplicate) {
+                arr.unshift(newSchedule); // Lưu mới nhất lên đầu
+                await AsyncStorage.setItem('schedule_history', JSON.stringify(arr));
+            }
+        } catch (e) {
+            // Có thể show toast hoặc alert
+        }
+        setIsLoading(false);
+    };
 
     // Tính toán
     let days: Date[] = [];
@@ -80,14 +127,14 @@ const Schedule = () => {
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: theme.text }]}>Saving Schedule</Text>
-                {/* <TouchableOpacity
+                <TouchableOpacity
                     style={[styles.saveButtonContainer, { borderColor: theme.border }, isLoading && styles.saveButtonDisabled]}
                     onPress={handleSaveSchedule}
                     disabled={isLoading}
                 >
                     <Text style={[styles.saveButton, { color: theme.text }]}>{isLoading ? "Saving..." : "Save"}</Text>
                     {!isLoading && <Ionicons name="checkmark" size={18} color={theme.primary} />}
-                </TouchableOpacity> */}
+                </TouchableOpacity>
             </View>
 
             {/* SET GOAL */}
@@ -141,6 +188,10 @@ const Schedule = () => {
                         goal={parseInt(goal)}
                         startDate={startDate}
                         endDate={endDate}
+                        savedStates={params.savedStates ? JSON.parse(params.savedStates as string) : undefined}
+                        onSaveStates={(states: boolean[]) => {
+                            savedStatesRef.current = states;
+                        }}
                     />
                 </View>
             )}

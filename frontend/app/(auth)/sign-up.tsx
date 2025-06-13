@@ -76,7 +76,7 @@ export default function SignUp() {
         <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
             <View style={[styles.container, { backgroundColor: theme.background }]}>
                 <Image source={require('@/assets/images/logosaving1.png')} style={styles.illustration} />
-                <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
+                <Text style={[styles.title, { color: theme.primary }]}>Create Account</Text>
 
                 {error && (
                     <View style={styles.errorBox}>

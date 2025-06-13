@@ -36,9 +36,9 @@ export default function SignIn() {
 
     return (
         <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={[styles.container, { backgroundColor: theme.background}]}>
+            <View style={[styles.container, { backgroundColor: theme.background }]}>
                 <Image source={require('@/assets/images/logosaving2.png')} style={styles.illustration} />
-                <Text style={[styles.title, { color: theme.text }]}>Welcome Back</Text>
+                <Text style={[styles.title, { color: theme.primary }]}>Welcome Back</Text>
 
                 {error && (
                     <View style={styles.errorBox}>
@@ -52,7 +52,12 @@ export default function SignIn() {
 
                 <TextInput style={[styles.input, { color: theme.text }, { borderColor: theme.border }, error && styles.errorInput]} placeholder="Enter email" autoCapitalize="none" value={email} onChangeText={setEmail} />
                 <TextInput style={[styles.input, { color: theme.text }, { borderColor: theme.border }, error && styles.errorInput]} placeholder="Enter password" secureTextEntry value={password} onChangeText={setPassword} />
-                <TouchableOpacity style={[styles.button, {backgroundColor: theme.primary}]} onPress={handleSignIn}>
+                <View style={{ marginTop: 8 }}>
+                    <TouchableOpacity onPress={() => router.push('/(auth)/forget-password')}>
+                        <Text style={[styles.linkText, { color: theme.text, alignSelf: 'flex-end' }]}>Forget Password?</Text>
+                    </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleSignIn}>
                     <Text style={[styles.buttonText]}>Sign In</Text>
                 </TouchableOpacity>
 

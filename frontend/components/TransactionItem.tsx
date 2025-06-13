@@ -18,7 +18,7 @@ const CATEGORY_ICONS = {
 const getFormattedAmount = (amount: any, isIncome: boolean) => {
     const num = Number(amount);
     if (isNaN(num)) return '0.00';
-    return `${isIncome ? '+' : '-'}$${Math.abs(num)}`;
+    return `${isIncome ? '+' : '-'}${Math.abs(num) + ' VND'}`;
 };
 
 export const TransactionItem = ({ item, onDelete }) => {
@@ -29,7 +29,7 @@ export const TransactionItem = ({ item, onDelete }) => {
     return (
         <View style={[styles.transactionCard, { backgroundColor: theme.card }]} key={item.id}>
             <TouchableOpacity style={styles.transactionContent}>
-                <View style={[styles.categoryIconContainer, { backgroundColor: theme.primary }]}>
+                <View style={[styles.categoryIconContainer, { backgroundColor: theme.background }]}>
                     <Ionicons name={iconName} size={22} color={isIncome ? theme.income : theme.expense} />
                 </View>
                 <View style={styles.transactionLeft}>

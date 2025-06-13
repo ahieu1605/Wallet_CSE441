@@ -25,6 +25,7 @@ import { BalanceCard } from '@/components/BalanceCard';
 import { TransactionItem } from '@/components/TransactionItem';
 import NoTransactionsFound from '@/components/NoTransactionsFound';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import Toast from 'react-native-toast-message';
 
 export default function HomePage() {
     const router = useRouter();
@@ -97,9 +98,9 @@ export default function HomePage() {
                     </View>
 
                     {/* Right Section */}
-                    <View style={styles.headerRight}>
+                    {/* <View style={styles.headerRight}>
                         <ThemeSwitcher />
-                        {/* <TouchableOpacity
+                        <TouchableOpacity
                             style={[
                                 styles.addButton,
                                 { backgroundColor: theme.primary },
@@ -110,9 +111,9 @@ export default function HomePage() {
                             <Text style={[styles.addButtonText, { color: theme.white }]}>
                                 Add
                             </Text>
-                        </TouchableOpacity> */}
+                        </TouchableOpacity>
                         <SignOutButton />
-                    </View>
+                    </View> */}
                 </View>
 
                 {/* Balance Summary */}
