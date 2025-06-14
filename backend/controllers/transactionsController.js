@@ -6,7 +6,7 @@ export async function getTransactionByUserId(req,res) {
         const transactions = await sql`SELECT *
                                        from transactions
                                        where user_id = ${userId}
-                                       ORDER BY created_at DESC`;
+                                       ORDER BY id DESC`;
         res.status(200).json(transactions);
     } catch (error) {
         console.log("Error getting transactions:", error);
