@@ -8,6 +8,7 @@ import { styles } from '@/assets/styles/auth.styles';
 import { COLORS } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { useAppTheme } from '@/components/ThemeProvider';
+import { API_URL } from '@/constants/api';
 
 export default function SignUp() {
     const { isLoaded, signUp, setActive } = useSignUp();
@@ -32,6 +33,16 @@ export default function SignUp() {
         }
     };
 
+    //////
+    const createProfile = async (userId: string, username: string) => {
+        await fetch(`${API_URL}/profiles`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, username })
+        });
+    };
+    //////////
+
     const handleVerify = async () => {
         if (!isLoaded) return;
 
@@ -39,6 +50,8 @@ export default function SignUp() {
             const attempt = await signUp.attemptEmailAddressVerification({ code });
             if (attempt.status === 'complete') {
                 await setActive({ session: attempt.createdSessionId });
+                const username = email.split('@')[0];
+                await createProfile(attempt.createdUserId, email); // hoặc username tuỳ bạn
                 router.replace('/');
             } else {
                 console.error(JSON.stringify(attempt, null, 2));
