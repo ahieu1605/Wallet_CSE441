@@ -34,11 +34,11 @@ export default function SignUp() {
     };
 
     //////
-    const createProfile = async (userId: string, username: string) => {
+    const createProfile = async (profile_id: string, username: string) => {
         await fetch(`${API_URL}/profiles`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, username })
+            body: JSON.stringify({ profile_id, username })
         });
     };
     //////////
@@ -51,7 +51,9 @@ export default function SignUp() {
             if (attempt.status === 'complete') {
                 await setActive({ session: attempt.createdSessionId });
                 const username = email.split('@')[0];
-                await createProfile(attempt.createdUserId, email); // hoặc username tuỳ bạn
+                if (attempt.createdUserId) {
+                    await createProfile(attempt.createdUserId, username);
+                }
                 router.replace('/');
             } else {
                 console.error(JSON.stringify(attempt, null, 2));
