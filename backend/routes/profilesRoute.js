@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
 
     try {
         const result = await sql`
-            INSERT INTO profiles (profile_id, custom_startMonth, username)
+            INSERT INTO profiles (profile_id, custom_startmonth, username)
             VALUES (${profile_id}, 1, ${username})
                 RETURNING *`;
         console.log("PROFILE CREATED:", result[0]); // 🧪 LOG 3
