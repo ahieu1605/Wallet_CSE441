@@ -6,13 +6,18 @@ router.post("/", async (req, res) => {
     const { profile_id, username } = req.body;
     try {
         const result = await sql`
-            INSERT INTO profiles (profile_id, custom_startMonth, username)
+            INSERT INTO profiles (profile_id, "custom_startMonth", username)
             VALUES (${profile_id}, 1, ${username})
                 RETURNING *`;
         res.status(201).json(result[0]);
     } catch (err) {
+        console.error("Error creating profile:", err);
         res.status(500).json({ error: "Failed to create profile" });
     }
+});
+
+router.get("/", (req, res) => {
+    res.json({ message: "Profiles API is working" });
 });
 
 export default router;

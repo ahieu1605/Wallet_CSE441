@@ -5,10 +5,11 @@ import transactionsRoute from "./routes/transactionsRoute.js";
 import dotenv from "dotenv";
 import job from "./config/cron.js";
 import profilesRoute from "./routes/profilesRoute.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
-
+app.use(cors());
 if(process.env.NODE_ENV !== "production") job.start();
 
 //middleware
