@@ -35,11 +35,18 @@ export default function SignUp() {
 
     //////
     const createProfile = async (profile_id: string, username: string) => {
-        await fetch(`${API_URL}/profiles`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ profile_id, username })
-        });
+        try {
+            console.log("CALLING API", profile_id, username);
+            const res = await fetch(`${API_URL}/profiles`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ profile_id, username })
+            });
+            const data = await res.json();
+            console.log("Profile response:", data); // 👈 Xem phản hồi từ backend
+        } catch (err) {
+            console.error("Failed to create profile:", err);
+        }
     };
     //////////
 
@@ -52,6 +59,7 @@ export default function SignUp() {
                 await setActive({ session: attempt.createdSessionId });
                 const username = email.split('@')[0];
                 if (attempt.createdUserId) {
+                    console.log("Creating profile with ID:", attempt.createdUserId, "Username:", username);
                     await createProfile(attempt.createdUserId, username);
                 }
                 router.replace('/');
@@ -59,7 +67,7 @@ export default function SignUp() {
                 console.error(JSON.stringify(attempt, null, 2));
             }
         } catch (err) {
-            const code = err.errors?.[0]?.code;
+            const code = (err as any)?.errors?.[0]?.code;
             setError(code === 'form_identifier_exists' ? 'Email already exists.' : 'An error occurred.');
         }
     };
