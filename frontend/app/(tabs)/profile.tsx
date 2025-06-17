@@ -44,20 +44,20 @@ const Profile = () => {
   //   };
   //   fetchHistory();
   // }, []);
-  useEffect(() => {
-    const fetchHistory = async () => {
-      if (!userId) return;
-      try {
-        const res = await fetch(`${API_URL}/schedules?user_id=${userId}`);
-        if (!res.ok) throw new Error('Failed to fetch schedules');
-        const data = await res.json();
-        setHistory(data); // data là mảng schedule từ backend
-      } catch (e) {
-        setHistory([]);
-      }
-    };
-    fetchHistory();
-  }, [userId]);
+  // useEffect(() => {
+  //   const fetchHistory = async () => {
+  //     if (!userId) return;
+  //     try {
+  //       const res = await fetch(`${API_URL}/schedules?user_id=${userId}`);
+  //       if (!res.ok) throw new Error('Failed to fetch schedules');
+  //       const data = await res.json();
+  //       setHistory(data); // data là mảng schedule từ backend
+  //     } catch (e) {
+  //       setHistory([]);
+  //     }
+  //   };
+  //   fetchHistory();
+  // }, [userId]);
 
   // useFocusEffect(
   //   React.useCallback(() => {
