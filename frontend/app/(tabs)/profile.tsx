@@ -59,16 +59,39 @@ const Profile = () => {
     fetchHistory();
   }, [userId]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchHistory = async () => {
-        const data = await AsyncStorage.getItem('schedule_history');
-        if (data) setHistory(JSON.parse(data));
-        else setHistory([]);
-      };
-      fetchHistory();
-    }, [])
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const fetchHistory = async () => {
+  //       const data = await AsyncStorage.getItem('schedule_history');
+  //       if (data) setHistory(JSON.parse(data));
+  //       else setHistory([]);
+  //     };
+  //     fetchHistory();
+  //   }, [])
+  // );
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!userId) return;
+      try {
+        const res = await fetch(`${API_URL}/schedules?user_id=${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch schedules');
+        const data = await res.json();
+        // Map lại dữ liệu cho đúng với UI
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          goal: item.goal,
+          startDate: item.start_date,
+          endDate: item.end_date,
+          savedAt: item.created_at,
+          name: item.name,
+        }));
+        setHistory(mapped);
+      } catch (e) {
+        setHistory([]);
+      }
+    };
+    fetchHistory();
+  }, [userId]);
 
   const handleUpdatePassword = async () => {
     if (!newPassword || !confirmPassword) {

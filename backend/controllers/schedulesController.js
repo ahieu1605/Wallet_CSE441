@@ -13,6 +13,7 @@ export async function createSchedule  (req, res)  {
         const schedule = scheduleResult.rows[0];
 
         // Insert days
+        // Insert days
         const days = [];
         let dt = new Date(startDate);
         const end = new Date(endDate);
@@ -22,6 +23,7 @@ export async function createSchedule  (req, res)  {
                 date: dt.toISOString().slice(0, 10),
                 is_checked: savedStates ? !!savedStates[idx] : false,
             });
+            dt = new Date(dt); // clone date before increment
             dt.setDate(dt.getDate() + 1);
             idx++;
         }
