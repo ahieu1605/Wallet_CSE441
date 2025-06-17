@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import job from "./config/cron.js";
 import profilesRoute from "./routes/profilesRoute.js";
 import cors from "cors";
-
+import schedulesRoute from "./routes/schedulesRoute.js";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 5001;
 
 app.use("/api/transactions",transactionsRoute);
 app.use("/api/profiles", profilesRoute);
-
+app.use("/api/schedules", schedulesRoute)
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -11,6 +11,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../../assets/styles/create.styles';
 import { styles as stylesHome } from '../../assets/styles/home.styles';
+import { API_URL } from '@/constants/api';
 interface ScheduleHistory {
   goal: number;
   startDate: string;
@@ -33,15 +34,30 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const userId = user?.id;
 
+  // useEffect(() => {
+  //   const fetchHistory = async () => {
+  //     const data = await AsyncStorage.getItem('schedule_history');
+  //     if (data) setHistory(JSON.parse(data));
+  //     else setHistory([]);
+  //   };
+  //   fetchHistory();
+  // }, []);
   useEffect(() => {
     const fetchHistory = async () => {
-      const data = await AsyncStorage.getItem('schedule_history');
-      if (data) setHistory(JSON.parse(data));
-      else setHistory([]);
+      if (!userId) return;
+      try {
+        const res = await fetch(`${API_URL}/schedules?user_id=${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch schedules');
+        const data = await res.json();
+        setHistory(data); // data là mảng schedule từ backend
+      } catch (e) {
+        setHistory([]);
+      }
     };
     fetchHistory();
-  }, []);
+  }, [userId]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -79,13 +95,20 @@ const Profile = () => {
     setLoading(false);
   };
 
-  const handleOpenSchedule = (item: ScheduleHistory) => {
+  const handleOpenSchedule = async (item) => {
+    // Gọi API lấy chi tiết schedule và các ngày
+    const res = await fetch(`${API_URL}/schedules/${item.id}`);
+    const data = await res.json();
+    // data.days là mảng các ngày, mỗi ngày có is_checked
+    const savedStates = data.days.map((d) => d.is_checked);
+    // Điều hướng sang màn hình schedule, truyền savedStates
     router.push({
       pathname: '/(tabs)/schedule',
       params: {
         goal: item.goal.toString(),
-        startDate: item.startDate,
-        endDate: item.endDate,
+        startDate: item.start_date,
+        endDate: item.end_date,
+        savedStates: JSON.stringify(savedStates),
         openSaved: '1',
       },
     });

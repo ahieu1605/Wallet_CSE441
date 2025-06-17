@@ -9,6 +9,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '@clerk/clerk-expo';
+
+import {API_URL} from "@/constants/api";
 
 const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -67,6 +70,8 @@ const Schedule = () => {
     const [history, setHistory] = useState<ScheduleHistory[]>([]);
     const params = useLocalSearchParams();
     const savedStatesRef = React.useRef<boolean[] | null>(null);
+    const { user } = useUser();
+    const userId = user?.id;
 
     React.useEffect(() => {
         if (params.goal && params.startDate && params.endDate) {
@@ -76,30 +81,56 @@ const Schedule = () => {
         }
     }, [params.goal, params.startDate, params.endDate]);
 
+    // const handleSaveSchedule = async () => {
+    //     if (!goal || !startDate || !endDate) return;
+    //     setIsLoading(true);
+    //     try {
+    //         let savedStates = savedStatesRef.current;
+    //         const newSchedule = {
+    //             goal: parseInt(goal),
+    //             startDate: startDate.toISOString(),
+    //             endDate: endDate.toISOString(),
+    //             savedAt: new Date().toISOString(),
+    //             savedStates,
+    //         };
+    //         // Lấy lịch sử cũ
+    //         const history = await AsyncStorage.getItem('schedule_history');
+    //         let arr = [];
+    //         if (history) arr = JSON.parse(history);
+    //         // Không lưu trùng
+    //         const isDuplicate = arr.some((item: any) => item.goal === newSchedule.goal && item.startDate === newSchedule.startDate && item.endDate === newSchedule.endDate);
+    //         if (!isDuplicate) {
+    //             arr.unshift(newSchedule); // Lưu mới nhất lên đầu
+    //             await AsyncStorage.setItem('schedule_history', JSON.stringify(arr));
+    //         }
+    //     } catch (e) {
+    //         // Có thể show toast hoặc alert
+    //     }
+    //     setIsLoading(false);
+    // };
     const handleSaveSchedule = async () => {
-        if (!goal || !startDate || !endDate) return;
+        if (!goal || !startDate || !endDate || !userId) return;
         setIsLoading(true);
         try {
             let savedStates = savedStatesRef.current;
             const newSchedule = {
+                user_id: userId,
                 goal: parseInt(goal),
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
-                savedAt: new Date().toISOString(),
                 savedStates,
+                name: '', // hoặc lấy từ input nếu có
             };
-            // Lấy lịch sử cũ
-            const history = await AsyncStorage.getItem('schedule_history');
-            let arr = [];
-            if (history) arr = JSON.parse(history);
-            // Không lưu trùng
-            const isDuplicate = arr.some((item: any) => item.goal === newSchedule.goal && item.startDate === newSchedule.startDate && item.endDate === newSchedule.endDate);
-            if (!isDuplicate) {
-                arr.unshift(newSchedule); // Lưu mới nhất lên đầu
-                await AsyncStorage.setItem('schedule_history', JSON.stringify(arr));
-            }
+            // Gửi lên backend
+            const res = await fetch(`${API_URL}/schedules`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newSchedule),
+            });
+            if (!res.ok) throw new Error('Failed to save schedule');
+            // Xử lý kết quả nếu cần
         } catch (e) {
-            // Có thể show toast hoặc alert
+            // Hiển thị thông báo lỗi nếu cần
         }
         setIsLoading(false);
     };
